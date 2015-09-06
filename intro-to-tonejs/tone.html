@@ -4,27 +4,30 @@
     <!--<script type="text/javascript" src="analyser.js"</script>-->
   </head>
   <body>
-    <h1>Welcome to Tone.js</h1>
+    <h1 style="font-family: sans-serif;">Welcome to Tone.js</h1>
 
     <table>
       <tr>
         <td>
           <canvas id="visualizer" width="640" height="100"></canvas>
         </td>
+        <td>
+          <div id="code" style="font-family: sans-serif;"></div>
+        </td>
       </tr>
       <tr>
         <td>&nbsp;</td>
       </tr>
       <tr>
-        <td>
-          <button id="squareOsc" onclick="startSquareOsc()">start square oscillator</button>
+        <td colspan="2">
+          <button id="squareOsc" onclick="startSquareOsc()">start saw oscillator</button>
           <input type="text" id="note"/>
           <button id="changeNote" onclick="changeNote()">change note</button>
-          <button id="stopSquareOsc" onclick="stopSquareOsc()">stop square oscillator</button>
+          <button id="stopSquareOsc" onclick="stopSquareOsc()">stop saw oscillator</button>
         </td>
       </tr>
       <tr>
-        <td>
+        <td colspan="2">
           <button id="addAmpEnv" onclick="addAmpEnv()">create with amplitude envelope</button>
           <button id="playWithEnv" onclick="playWithEnv()">play with envelope</button>
           <input type="text" id="noteLength"/>
@@ -32,19 +35,19 @@
         </td>
       </tr>
       <tr>
-        <td>
+        <td colspan="2">
           <button id="playLfoAndFilter" onclick="playLfoAndFilter()">play with LFO on Filter</button>
           <button id="stopLfoAndFilter" onclick="stopLfoAndFilter()">stop LFO on Filter</button>
         </td>
       </tr>
       <tr>
-        <td>
+        <td colspan="2">
           <button id="playLfoOnOsc" onclick="playLfoOnOsc()">play with LFO on Oscillator</button>
           <button id="stopLfoOnOsc" onclick="stopLfoOnOsc()">stop LFO on Oscillator</button>
         </td>
       </tr>
       <tr>
-        <td>
+        <td colspan="2">
           <button id="createDrums" onclick="drums()">create drums</button>
           <button id="triggerDrums" onclick="triggerDrums()">trigger drums</button>
           <button id="stopDrums" onclick="stopDrums()">stop drums</button>
@@ -66,7 +69,6 @@
     var audioCtx = Tone.context;
 
     // initialize the analyser so that it's ready to display the audio
-    console.log('init analyser');
     initAnalyser(audioCtx);
 
     // call the draw function every 0.1 second, base this on Tone's Transport oscillator
@@ -75,7 +77,7 @@
     }, '0.1');
 
     // create a plain old oscillator with a square wave
-    var onmiOsc;
+    var omniOsc;
     var ampEnv;
     var filter;
     var lfo;
@@ -87,6 +89,8 @@
       omniOsc = new Tone.OmniOscillator('c3', 'sawtooth');
       omniOsc.connect(analyser);
       omniOsc.toMaster();
+
+      document.querySelector('#code').innerHTML = 'omniOsc = new Tone.OmniOscillator(\'c3\', \'sawtooth\');<br>omniOsc.toMaster();';
 
       // start it up
       Tone.Transport.start();
@@ -109,12 +113,15 @@
       ampEnv.toMaster();
       omniOsc.connect(ampEnv);
 
+      document.querySelector('#code').innerHTML = 'omniOsc = new Tone.OmniOscillator(\'c3\', \'sawtooth\');<br>ampEnv = new Tone.AmplitudeEnvelope({attack: 0.1, decay: 0.1, sustain: 0.5, release: 1});<br>ampEnv.toMaster();<br>omniOsc.connect(ampEnv);';
+
       Tone.Transport.start();
       omniOsc.start();
     };
 
     function playWithEnv() {
       ampEnv.triggerAttackRelease(document.querySelector('#noteLength').value);
+      document.querySelector('#code').innerHTML = 'ampEnv.triggerAttackRelease(' + document.querySelector('#noteLength').value + ');';
     };
 
     function stopWithEnv() {
@@ -130,6 +137,7 @@
 
     function changeNote() {
       omniOsc.frequency.value = document.querySelector('#note').value;
+      document.querySelector('#code').innerHTML = 'omniOsc.frequency.value = document.querySelector(\''+ document.querySelector('#note').value + '\').value;';
     };
 
     function playLfoAndFilter() {
@@ -140,6 +148,8 @@
       omniOsc.connect(filter);
       filter.connect(analyser);
       filter.toMaster();
+
+      document.querySelector('#code').innerHTML = 'omniOsc = new Tone.OmniOscillator(\'e3\', \'sawtooth\');<br>filter = new Tone.Filter(200, \'lowpass\', -12);<br>lfo = new Tone.LFO(2, 200, 600);<br>lfo.connect(filter.frequency);<br>omniOsc.connect(filter);<br>filter.toMaster();';
 
       Tone.Transport.start();
       omniOsc.start();
@@ -163,10 +173,12 @@
 
     function playLfoOnOsc() {
       omniOsc = new Tone.OmniOscillator('e2', 'sawtooth');
-      lfo = new Tone.LFO(1, Tone.noteToFrequency('e2'), Tone.noteToFrequency('e5'));
+      lfo = new Tone.LFO(1, Tone.Transport.noteToFrequency('e2'), Tone.Transport.noteToFrequency('e5'));
       lfo.connect(omniOsc.frequency);
       omniOsc.connect(analyser);
       omniOsc.toMaster();
+
+      document.querySelector('#code').innerHTML = 'omniOsc = new Tone.OmniOscillator(\'e2\', \'sawtooth\');<br>lfo = new Tone.LFO(1, Tone.noteToFrequency(\'e2\'), Tone.noteToFrequency(\'e5\'));<br>lfo.connect(omniOsc.frequency);<br>omniOsc.toMaster();';
 
       Tone.Transport.start();
       omniOsc.start();
@@ -198,6 +210,8 @@
       volume.connect(analyser);
       volume.toMaster();
 
+      document.querySelector('#code').innerHTML = 'omniOsc = new Tone.OmniOscillator(\'e2\', \'sine\');<br>scaledEnv = new Tone.ScaledEnvelope({attack: 0.01, decay: 0.05, sustain: 1, release: 0.5, min: 0.01, max: Tone.Transport.noteToFrequency(\'e2\'), attackCurve: \'exponential\'});<br>ampEnv = new Tone.AmplitudeEnvelope({attack: 0.01, decay: 0.05, sustain: 1, release: 0.5});<br>volume = new Tone.Volume(12);<br>omniOsc.connect(ampEnv);<br>scaledEnv.connect(omniOsc.frequency);<br>ampEnv.connect(volume);<br>volume.toMaster();';
+
       Tone.Transport.start();
       omniOsc.start();
 
@@ -206,6 +220,8 @@
     function triggerDrums() {
       scaledEnv.triggerAttackRelease('8n', '+0.01');
       ampEnv.triggerAttackRelease('8n', '+0.01');
+
+      document.querySelector('#code').innerHTML = 'scaledEnv.triggerAttackRelease(\'8n\', \'+0.01\');<br>ampEnv.triggerAttackRelease(\'8n\', \'+0.01\');';
     };
 
     function stopDrums() {
@@ -226,7 +242,6 @@
     }
 
     function initAnalyser(audioCtx) {
-      console.log('inside init analyser');
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 2048;
       bufferLength = analyser.frequencyBinCount;
