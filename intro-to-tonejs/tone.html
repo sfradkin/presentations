@@ -1,8 +1,272 @@
 <html>
   <head>
     <script type="text/javascript" src="http://cdn.tonejs.org/latest/Tone.min.js"></script>
+    <!--<script type="text/javascript" src="analyser.js"</script>-->
   </head>
   <body>
     <h1>Welcome to Tone.js</h1>
+
+    <table>
+      <tr>
+        <td>
+          <canvas id="visualizer" width="640" height="100"></canvas>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td>
+          <button id="squareOsc" onclick="startSquareOsc()">start square oscillator</button>
+          <input type="text" id="note"/>
+          <button id="changeNote" onclick="changeNote()">change note</button>
+          <button id="stopSquareOsc" onclick="stopSquareOsc()">stop square oscillator</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="addAmpEnv" onclick="addAmpEnv()">create with amplitude envelope</button>
+          <button id="playWithEnv" onclick="playWithEnv()">play with envelope</button>
+          <input type="text" id="noteLength"/>
+          <button id="stopWithEnv" onclick="stopWithEnv()">stop with envelope</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="playLfoAndFilter" onclick="playLfoAndFilter()">play with LFO on Filter</button>
+          <button id="stopLfoAndFilter" onclick="stopLfoAndFilter()">stop LFO on Filter</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="playLfoOnOsc" onclick="playLfoOnOsc()">play with LFO on Oscillator</button>
+          <button id="stopLfoOnOsc" onclick="stopLfoOnOsc()">stop LFO on Oscillator</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <button id="createDrums" onclick="drums()">create drums</button>
+          <button id="triggerDrums" onclick="triggerDrums()">trigger drums</button>
+          <button id="stopDrums" onclick="stopDrums()">stop drums</button>
+        </td>
+      </tr>
+    </table>
+
+
+    <script>
+    var analyser;
+    var dataArray;
+    var canvasCtx;
+    var bufferLength;
+    var canvas;
+
+    var WIDTH = 640;
+    var HEIGHT = 100;
+
+    var audioCtx = Tone.context;
+
+    // initialize the analyser so that it's ready to display the audio
+    console.log('init analyser');
+    initAnalyser(audioCtx);
+
+    // call the draw function every 0.1 second, base this on Tone's Transport oscillator
+    Tone.Transport.setInterval(function(time) {
+      draw();
+    }, '0.1');
+
+    // create a plain old oscillator with a square wave
+    var onmiOsc;
+    var ampEnv;
+    var filter;
+    var lfo;
+    var scaledEnv;
+    var volume;
+
+    function startSquareOsc() {
+      // hook up the oscillator to the analyzer and master output
+      omniOsc = new Tone.OmniOscillator('c3', 'sawtooth');
+      omniOsc.connect(analyser);
+      omniOsc.toMaster();
+
+      // start it up
+      Tone.Transport.start();
+      omniOsc.start();
+    };
+
+    function stopSquareOsc() {
+      omniOsc.stop();
+      Tone.Transport.stop();
+
+      omniOsc.disconnect(Tone.Master);
+      omniOsc.disconnect(analyser);
+      omniOsc.dispose();
+    };
+
+    function addAmpEnv() {
+      omniOsc = new Tone.OmniOscillator('c3', 'sawtooth');
+      ampEnv = new Tone.AmplitudeEnvelope({attack: 0.1, decay: 0.1, sustain: 0.5, release: 1});
+      ampEnv.connect(analyser);
+      ampEnv.toMaster();
+      omniOsc.connect(ampEnv);
+
+      Tone.Transport.start();
+      omniOsc.start();
+    };
+
+    function playWithEnv() {
+      ampEnv.triggerAttackRelease(document.querySelector('#noteLength').value);
+    };
+
+    function stopWithEnv() {
+      omniOsc.stop();
+      Tone.Transport.stop();
+
+      ampEnv.disconnect(Tone.Master);
+      ampEnv.disconnect(analyser);
+      omniOsc.disconnect(ampEnv);
+      ampEnv.dispose();
+      omniOsc.dispose();
+    };
+
+    function changeNote() {
+      omniOsc.frequency.value = document.querySelector('#note').value;
+    };
+
+    function playLfoAndFilter() {
+      omniOsc = new Tone.OmniOscillator('e3', 'sawtooth');
+      filter = new Tone.Filter(200, 'lowpass', -12);
+      lfo = new Tone.LFO(2, 200, 600);
+      lfo.connect(filter.frequency);
+      omniOsc.connect(filter);
+      filter.connect(analyser);
+      filter.toMaster();
+
+      Tone.Transport.start();
+      omniOsc.start();
+      lfo.start();
+    };
+
+    function stopLfoAndFilter() {
+      lfo.stop();
+      omniOsc.stop();
+      Tone.Transport.stop();
+
+      filter.disconnect(Tone.Master);
+      filter.disconnect(analyser);
+      lfo.disconnect(filter.frequency);
+      omniOsc.disconnect(filter);
+
+      lfo.dispose();
+      filter.dispose();
+      omniOsc.dispose();
+    }
+
+    function playLfoOnOsc() {
+      omniOsc = new Tone.OmniOscillator('e2', 'sawtooth');
+      lfo = new Tone.LFO(1, Tone.noteToFrequency('e2'), Tone.noteToFrequency('e5'));
+      lfo.connect(omniOsc.frequency);
+      omniOsc.connect(analyser);
+      omniOsc.toMaster();
+
+      Tone.Transport.start();
+      omniOsc.start();
+      lfo.start();
+    };
+
+    function stopLfoOnOsc() {
+      lfo.stop();
+      omniOsc.stop();
+      Tone.Transport.stop();
+
+      omniOsc.disconnect(Tone.Master);
+      omniOsc.disconnect(analyser);
+      lfo.disconnect(omniOsc.frequency);
+
+      lfo.dispose();
+      omniOsc.dispose();
+    };
+
+    function drums() {
+      omniOsc = new Tone.OmniOscillator('e2', 'sine');
+      scaledEnv = new Tone.ScaledEnvelope({attack: 0.01, decay: 0.05, sustain: 1, release: 0.5, min: 0.01, max: Tone.Transport.noteToFrequency('e2'), attackCurve: 'exponential'});
+      ampEnv = new Tone.AmplitudeEnvelope({attack: 0.01, decay: 0.05, sustain: 1, release: 0.5});
+      volume = new Tone.Volume(12);
+
+      omniOsc.connect(ampEnv);
+      scaledEnv.connect(omniOsc.frequency);
+      ampEnv.connect(volume);
+      volume.connect(analyser);
+      volume.toMaster();
+
+      Tone.Transport.start();
+      omniOsc.start();
+
+    };
+
+    function triggerDrums() {
+      scaledEnv.triggerAttackRelease('8n', '+0.01');
+      ampEnv.triggerAttackRelease('8n', '+0.01');
+    };
+
+    function stopDrums() {
+
+      omniOsc.stop();
+      Tone.Transport.stop();
+
+      omniOsc.disconnect(ampEnv);
+      scaledEnv.disconnect(omniOsc.frequency);
+      ampEnv.disconnect(volume);
+      volume.disconnect(analyser);
+      volume.disconnect(Tone.Master);
+
+      omniOsc.dispose();
+      scaledEnv.dispose();
+      ampEnv.dispose();
+      volume.dispose();
+    }
+
+    function initAnalyser(audioCtx) {
+      console.log('inside init analyser');
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      canvas = document.querySelector('#visualizer');
+      canvasCtx = canvas.getContext("2d");
+
+      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+    };
+
+
+    function draw() {
+      drawVisual = requestAnimationFrame(draw);
+      analyser.getByteTimeDomainData(dataArray);
+      canvasCtx.fillStyle = 'rgb(200, 200, 200)';
+      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+      canvasCtx.beginPath();
+      var sliceWidth = WIDTH * 1.0 / bufferLength;
+      var x = 0;
+      for(var i = 0; i < bufferLength; i++) {
+
+        var v = dataArray[i] / 128.0;
+        var y = v * HEIGHT/2;
+
+        if(i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      canvasCtx.lineTo(canvas.width, canvas.height/2);
+      canvasCtx.stroke();
+    };
+
+    </script>
   </body>
 </html>
