@@ -53,6 +53,12 @@
           <button id="stopDrums" onclick="stopDrums()">stop drums</button>
         </td>
       </tr>
+      <tr>
+        <td colspan="2">
+          <button id="acidHouse" onclick="acidHouse()">play techno</button>
+          <button id="acidHouseStop" onclick="acidHouseStop()">stop techno</button>
+        </td>
+      </tr>
     </table>
 
 
@@ -83,6 +89,13 @@
     var lfo;
     var scaledEnv;
     var volume;
+    var synth1;
+    var synth2;
+    var beats;
+    var idx = 0;
+    var notes1;
+    var notes2;
+    var beat;
 
     function startSquareOsc() {
       // hook up the oscillator to the analyzer and master output
@@ -239,6 +252,63 @@
       scaledEnv.dispose();
       ampEnv.dispose();
       volume.dispose();
+    };
+
+    function acidHouse() {
+      notes1 = ['e5', '~', 'f5', 'a5', '~', 'c5', 'e4', 'g5'];
+      notes2 = ['c3', '~', '~', 'e2', '~', '~', 'a2', '~'];
+      beat = ['x', '~', 'x', '~', 'x', '~', 'x', '~'];
+
+      synth1 = new Tone.MonoSynth({type: 'sawtooth'});
+      synth2 = new Tone.MonoSynth({type: 'sine'});
+      beats = new Tone.DrumSynth();
+
+      synth1.connect(analyser);
+      synth2.connect(analyser);
+      beats.connect(analyser);
+
+      synth1.toMaster();
+      synth2.toMaster();
+      beats.toMaster();
+
+      idx = 0;
+
+      Tone.Transport.setInterval(function(time) {
+        console.log('time: ' + time + ', idx: ' + idx + ', ' + notes1[idx % 8] + ', ' + notes2[idx % 8] + ', ' + beat[idx % 8]);
+        if (notes1[idx % 8] !== '~') {
+          synth1.triggerAttackRelease(notes1[idx % 8], '16n', time);
+        }
+
+        if (notes2[idx % 8] !== '~') {
+          synth2.triggerAttackRelease(notes2[idx % 8], '4n', time);
+        }
+
+        if (beat[idx % 8] === 'x') {
+          beats.triggerAttackRelease('e2', '8n', time);
+        }
+
+        idx ++;
+        console.log('idx: ' + idx);
+      }, '8n');
+
+      Tone.Transport.start();
+      Tone.Transport.bpm.value = 100;
+
+    };
+
+    function acidHouseStop() {
+      Tone.Transport.stop();
+
+      synth1.disconnect(analyser);
+      synth1.disconnect(Tone.Master);
+      synth2.disconnect(analyser);
+      synth2.disconnect(Tone.Master);
+      beats.disconnect(analyser);
+      beats.disconnect(Tone.Master);
+
+      synth1.dispose();
+      synth2.dispose();
+      beats.dispose();
     }
 
     function initAnalyser(audioCtx) {
