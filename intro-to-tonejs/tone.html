@@ -96,6 +96,7 @@
     var notes1;
     var notes2;
     var beat;
+    var intervalId;
 
     function startSquareOsc() {
       // hook up the oscillator to the analyzer and master output
@@ -273,7 +274,7 @@
 
       idx = 0;
 
-      Tone.Transport.setInterval(function(time) {
+      intervalId = Tone.Transport.setInterval(function(time) {
         console.log('time: ' + time + ', idx: ' + idx + ', ' + notes1[idx % 8] + ', ' + notes2[idx % 8] + ', ' + beat[idx % 8]);
         if (notes1[idx % 8] !== '~') {
           synth1.triggerAttackRelease(notes1[idx % 8], '16n', time);
@@ -293,6 +294,7 @@
 
       Tone.Transport.start();
       Tone.Transport.bpm.value = 100;
+      Tone.Master.volume.value = -20;
 
     };
 
@@ -309,7 +311,9 @@
       synth1.dispose();
       synth2.dispose();
       beats.dispose();
-    }
+
+      Tone.Transport.clearInterval(intervalId);
+    };
 
     function initAnalyser(audioCtx) {
       analyser = audioCtx.createAnalyser();
