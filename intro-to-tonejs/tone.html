@@ -275,7 +275,7 @@
       idx = 0;
 
       intervalId = Tone.Transport.setInterval(function(time) {
-        console.log('time: ' + time + ', idx: ' + idx + ', ' + notes1[idx % 8] + ', ' + notes2[idx % 8] + ', ' + beat[idx % 8]);
+        //console.log('time: ' + time + ', idx: ' + idx + ', ' + notes1[idx % 8] + ', ' + notes2[idx % 8] + ', ' + beat[idx % 8]);
         if (notes1[idx % 8] !== '~') {
           synth1.triggerAttackRelease(notes1[idx % 8], '16n', time);
         }
@@ -289,7 +289,7 @@
         }
 
         idx ++;
-        console.log('idx: ' + idx);
+        //console.log('idx: ' + idx);
       }, '8n');
 
       Tone.Transport.start();
