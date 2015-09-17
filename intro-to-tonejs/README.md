@@ -6,9 +6,11 @@ Presentation resides in [Google Docs](https://drive.google.com/open?id=1Vz3YW2q8
 
 The tone.html file in this repository contains the pieces of the demo for the presentation.
 
+Please see [my clone of Snap!](https://github.com/sfradkin/Snap--Build-Your-Own-Blocks) to see the initial Tone.js integration I showed during the presentation.
+
 This presentation was originally given to MadJS on September 14, 2015.
 
-Presentation video is forthcoming.
+Presentation video can be seen on [YouTube](https://www.youtube.com/watch?v=LluWo3eY-m4&feature=youtu.be).
 
 The presentation is licensed under the [Attribution-NonCommercial-ShareAlike 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
 
