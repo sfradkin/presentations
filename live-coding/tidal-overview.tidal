@@ -1,0 +1,99 @@
+--------------------------------
+| Milwaukee Code Camp          |
+| 10-24-2015                   |
+| Tidal overview               |
+| Tidal: http://tidal.lurk.org |
+|                              |
+| Have fun coding music!       |
+--------------------------------
+
+-- Tidal by default is sample based. You're creating patterns and manipulating them
+
+-- each line can be evaled separately in your favorite editor
+
+-- The Tidal website has a bunch of great documentation
+
+-- eval the bps function to modify the tempo
+bps(240/120)
+
+-- eval the hush command to stop all audio output
+hush
+
+-- there are 9 channels of output by default: d1 through d9
+
+-- we can easily create a beat
+d1 $ sound "bd"
+
+-- we can then create a pattern that plays 4 kicks, notice that they play faster
+-- we're adding more beats to the pattern which is essentially a looping measure of time
+d1 $ sound "bd*4"
+
+-- we can use square brackets to embed beats within beats
+-- here we've defined 4 beats, notice how the 2nd beat has 2 "bd" which are
+-- played closer together than the other beats
+-- "~" is a rest, nothing plays
+d1 $ sound "bd [bd bd] ~ bd"
+
+-- we can layer multiple patterns together for polyrhythms using comma
+-- the "sn" samples play in the same length of time as the "bd" samples
+-- because of this, the "sn" samples are played further apart than the "bd" samples
+d1 $ sound "[bd*4, sn*3]"
+
+-- the square brackets can also be used to provide alternation between defined samples
+-- along with a "/" operator
+-- in this example every other cycle a "bd" or "sn" will play
+d1 $ sound "[bd sn]/2"
+
+-- if we use curly braces instead of square brackets, things work a bit differently
+-- in this example, the length of the pattern is dependent upon the first pattern in the
+-- curly braces
+-- so it's 4 beats long
+-- the second pattern is 5 beats, and those beats will sound at the same time as
+-- the "bd" beats and this works like:
+-- bd1/sn bd2/cp bd3/e bd4/cp --- repeat cycle here --- bd1/sn*2 bd2/sn bd3/cp bd4/e
+d1 $ sound "{bd*4, sn cp e cp sn*2}"
+
+-- we can force a specific number of beats in a cycle using the "%"" operator
+-- here we define 3 beats in the pattern but tell it to use a 2 beat pattern
+d1 $ sound "{bd sn cp*2}%2"
+
+-- there are a number of functions that are applied on each beat in a pattern definition
+-- here we apply the "gain" function to a pattern to lower the volume
+d1 $ sound "bd*4" # gain "0.5"
+
+-- if we have multiple numbers, they apply to specific beats
+-- so if there are 4 beats defined, we could change the volume of each beat like:
+d1 $ sound "bd*4" # gain "0.5 1 0.2 2.5"
+
+-- we can also use continuous functions to define the values
+-- "sine1" will use a sine wave to vary the value between 0 and 1
+-- thus, the follwing will pan the samples left and right as they're played
+d1 $ sound "bd sn cp e cp sn bd" # pan (slow 4 $ sine1)
+
+-- there are also functions that modify the entire output of the pattern
+-- the "jux" function will split the audio into left and right channels,
+-- then apply transformations to the right channel
+-- here we simply reverse the pattern in the right channel
+d1 $ jux(rev) $ "bd sn cp ~ e"
+
+-- other fun functions are striate and chop which chop up the output of a pattern
+d1 $ striate 32 $ sound "{bd sn cp*2}%2"
+
+-- Tidal can also output MIDI commands to MIDI devices
+-- here is the setup needed to connect to a Volca Bass synth
+-- The connect string differs based upon your USB to MIDI connection
+-- Tidal has the ability to send messages to multiple MIDI channels as well
+import Sound.Tidal.MIDI.Output
+
+import Sound.Tidal.VolcaBass
+
+bassStreams <- midiproxy 1 "USB2.0-MIDI Port 2" [(bass, 1)]
+
+[k1] <- sequence bassStreams
+
+-- Now we can talk to the MIDI device just like creating sample patterns
+-- The difference is that we send in "note"s rather than "sound"s
+k1 $ jux(rev) $ note "64 72*3 ~ [~ 66]"
+
+-- hush won't hush the MIDI device, so call "silence"
+k1 $ silence
