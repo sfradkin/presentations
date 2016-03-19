@@ -1,0 +1,90 @@
+This file is presented under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+License details can be found at: https://creativecommons.org/licenses/by-nc-sa/4.0/
+Please give attribution to Scott Fradkin, http://www.fradkin.com
+
+-------------------------
+
+This is a really rough outline with really rough timings.
+Overall this is meant to fit in a 3 hour block of time.
+These rough timings should put it around 2:30 or 2:45
+
+The corresponding example files are numbered 1.rb to 6.rb.
+
+--------------------------
+
+15m
+intro
+go over the Sonic Pi UI
+
+play
+sleep
+sample
+
+10m
+work time - get acclimated with simple commands
+
+--------------
+
+10m
+function def
+number times loops
+define a day with functions
+
+15m
+work time - define a day with functions
+
+-------------  50m
+
+15m
+chords
+scales
+rings
+look
+tick
+choose
+rrand
+use_random_seed
+
+15m
+work time - make some loops and use the above
+
+--------------------------------- 1hr 20m
+
+Long break 15m+.  Get a snack!
+--------------------
+
+10m
+different synths and the various parameters
+use_synth
+with_synth
+
+parameters on play
+
+sample
+beat_stretch
+sample_duration()
+
+10m
+work time
+--------------------------  20m
+
+5m
+with_fx
+different parameters on fx
+
+10m
+work time
+
+------------------- 35m
+
+15m
+in_thread
+live_loop
+cue
+sync
+live_loop sync parameter
+
+15m
+work time
+
+------------------------------------- 1hr 5m
