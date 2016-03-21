@@ -30,6 +30,8 @@ function def
 number times loops
 define a day with functions
 
+this section was inspired by Jonathan Graham's blog entry: http://jonathangraham.github.io/2015/08/13/Teaching%20Programming%20with%20SonicPi/
+
 15m
 work time - define a day with functions
 
