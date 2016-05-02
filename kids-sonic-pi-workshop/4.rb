@@ -51,3 +51,10 @@
 ##|   sample :loop_amen
 ##|   sleep sample_duration :loop_amen
 ##| end
+
+##| use_sample_bpm :loop_amen, num_beats: 100
+
+##| 4.times do
+##|   sample :loop_amen, amp: 2
+##|   sleep 100
+##| end

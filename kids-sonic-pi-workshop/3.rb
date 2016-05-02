@@ -46,3 +46,5 @@ r = (ring :c4, :d4, :e4)
 ##|   play r.choose
 ##|   sleep 0.5
 ##| end
+
+# Let's take a snack break!
