@@ -1,0 +1,170 @@
+-- Hi CodeStock!
+-- This is an intro to making music with TidalCycles
+-- After the conference you will be able to find this file in Github at
+-- https://github.com/sfradkin/presentations/tree/master/codestock
+
+-- some things to know...
+-- there are 9 outputs called d1 ... d9
+-- the '$' symbol evaluates everything on the right and uses that as an
+-- argument to the function on the left
+-- the '.' symbol is function composition
+-- you don't really need to know Haskell to use TidalCycles!
+-- Ctrl + Enter will do multi-line evaluation
+-- Code that you write will play music in a cycle
+
+-- let's make a sound with some samples
+-- there are a number of samples that come with TidalCycles or you can
+-- point it to your own sample directory
+
+d1 $ sound "bd"
+
+-- this will play a bass drum once every cycle
+-- this says, find the "bd" directory and play the 1st sample in it
+
+d1 $ sound "bd:9"
+
+-- alternate syntax use 's' to denote the sample and 'n' to denote the number
+-- when connecting these together we use the '#' character
+
+d1 $ s "bd" # n "9 9 0"
+
+d1 $ n "9" # s "bd"
+
+-- you can also use different samples in the same pattern
+
+d1 $ sound "bd sn"
+
+-- one thing you may notice is that when you add more samples to the pattern,
+-- the samples play closer together.
+-- that's because each pattern is one cycle long.  More events in a cycle means
+-- that they're squashed together.
+
+d1 $ sound "bd sn bd sn"
+
+-- use '~' as a rest in the pattern
+
+d1 $ sound "bd sn ~"
+
+-- when defining patterns to play, the first pattern after "d1 $" sets
+-- the beat pattern
+
+hush
+
+d1 $ silence
+
+d1 $ s "bd bd" # n "0"
+
+d1 $ n "0 0" # s "bd"
+
+-- use a '*' to speed up events some number of times
+
+d1 $ sound "bd"
+
+-- use a '/' to slow down events
+
+d1 $ sound "bd/2"
+
+-- you can use [] to group things together in a pattern
+-- everything inside of [] is a single event
+
+d1 $ sound "bd bd sn sn"
+
+-- you can nest brackets as well
+
+d1 $ sound "bd [bd [sn [sn sn] sn] sn]"
+
+-- gets interesting to use '/' with groups
+
+d1 $ sound "[bd sn]/2"
+
+-- or even
+
+d1 $ sound "[[bd bd] [sn sn]]/2"
+
+-- use a comma to separate sequences that should play at the same time in
+-- a group
+
+d1 $ sound "[bd bd bd bd, sn cp sn cp]"
+
+-- if they're unequal lengths, then you get a polyrhythm
+
+d1 $ sound "[bd bd bd, sn cp sn cp]"
+
+hush
+
+-- TidalCycles has some functions that manipulate patterns
+
+d1 $ sound "bd sn cp"
+
+d1 $ jux (rev) $ sound "bd sn cp"
+
+-- try density, slow, every n, sometimes
+
+-- interesting polymeter can also be created using '{}'
+
+d1 $ sound "bd sn cp ho hc"
+
+d1 $ sound "{bd sn cp ho hc}%4"
+
+-- effects
+
+-- # |=| |+| |-| |*| |/|
+
+-- gain pan up speed
+
+d1 $ every 2 (|+| up "5") $ sound "bd" # up "7"
+
+-- euclidean sequences
+
+d1 $ sound "bd(3, 8)"
+
+d1 $ sound "bd"
+
+-- tempo: either cps or bps
+
+bps (120/60)
+
+cps (60/60)
+
+-- continuous patterns
+
+d1 $ sound "hh"
+
+d1 $ sound "hh*32"
+
+d1 $ sound "hh*32" # pan (slow 8 $ sine1)
+
+d1 $ sound "hh*32" # cutoff (scale 300 1000 $ slow 8 $ sine1)
+
+hush
+
+let (freq, freq_p) = pF "freq" (Just 440)
+
+-- using synths
+
+-- i have some custom synths called "sf_sine", "sf_saw", "sf_sq", and "sf_tri"
+-- these are basic waves
+
+-- i've customized it to use "freq" to set the frequency
+-- can also use n "c4"
+-- use sustain
+-- pan, vowel
+cps (60/60)
+
+cps (30/60)
+
+d1 $ freq "100" # s "sf_sine" # sustain "4"
+
+d1 $ n "c5" # s "sf_sine" # sustain "4"
+
+d1 $ n "c5*4" # s "sf_sine" # sustain "0.25" # vowel "a e i o"
+
+hush
+
+d1 $ stack [
+  freq "100" # s "sf_sine" # sustain "11",
+  freq "100.5" # s "sf_sine" # sustain "11",
+  sound "bd:9" # gain "0.8",
+  every 5 (const $ n "e6" # s "sf_sq" # sustain "2") $ n "c6 ~ d6" # s "sf_sq" # sustain "0.1" # gain "0.8",
+  slowspread (striate) [32, 8, 128] $ n "0*4" # s "cp" # gain "0.7"
+]
