@@ -14,3 +14,6 @@ workshop.tidal contains the starting sample code that I'll be going through duri
 * http://ask.tidalcycles.org
 * http://lurk.org/groups/tidal
 * https://github.org/tidalcycles/Tidal
+* http://toplap.org/
+* http://toplap.org/toplap-on-slack/
+* http://iclc.livecodenetwork.org/2016/
