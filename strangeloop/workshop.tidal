@@ -1,0 +1,406 @@
+
+hush
+
+import Sound.Tidal.Vis
+import qualified Graphics.Rendering.Cairo as C
+import Data.Colour
+import Data.Colour.Names
+import Data.Colour.SRGB
+let draw pat = vLines (C.withSVGSurface) "/Users/sfradkin/code/tidal-files/live-coded/test.svg" (800,200) pat 4 1
+
+------------------
+
+d1 $ sound "bd"
+
+d1 $ sound "bd:0"
+
+d1 $ n "0" # s "bd"
+
+d1 $ s "bd" # n "0"
+
+--------------------
+
+d1 $ sound "bd:0 sn:0"
+
+d1 $ sound "bd:1 ~ sn:0 sn:0"
+
+d1 $ sound "cp cp"
+
+d1 $ sound "[cp cp] cp"
+
+d1 $ sound "cp cp cp"
+
+d1 $ sound "cp [cp [cp cp] cp] cp cp"
+
+d1 $ sound "cp [cp? [cp? cp] cp?] cp? cp"
+
+d1 $ sound "cp cp*4"
+
+d1 $ sound "cp/4 cp"
+
+d1 $ sound "[cp sn]/2"
+
+d1 $ sound "[cp cp cp, sn sn]"
+
+d1 $ sound "{cp cp cp, sn sn}"
+
+d1 $ sound "{hh hh hh, arpy:0 arpy:1}"
+
+d1 $ sound "{arpy:0 arpy:1, hh hh hh}"
+
+d1 $ sound "{cp sn hh}%2"
+
+d1 $ sound "{cp sn hh}%5"
+
+---------------------------------
+
+d1 $ sound "cp ~ ~ cp"
+
+d1 $ sound "[cp ~ ~ cp, hh hh hh hh]"
+
+------------------------------------
+
+d1 $ sound "cp(3, 8)"
+
+d1 $ sound "cp(5, 8)"
+
+d1 $ sound "cp(5, 16)"
+
+d1 $ sound "cp(3, 10)"
+
+-- http://tidalcycles.org/patterns.html#bjorklund
+
+-------------------------------------
+cps (60/60) -- 1 cycle per second
+cps (30/60) -- 1/2 cycle per second == 1 cycle per 2 seconds
+cps (120/60) -- 2 cycles per second
+
+d1 $ n "0" # s "bd"
+
+-- assume 1 sound event in a cycle and the value over 60 gives beats per minute
+
+bps (60/120) -- 1 beat per second
+bps (30/120) -- 1/2 beat per second
+
+d1 $ n "0*4" # s "bd"
+
+-- assume 4 sound events in a cycle and the value over 120 gives beats per minute
+
+-------------------------------------
+
+d1 $ sound "bd:0*4" # gain "1.5"
+
+d1 $ n "0 0 0 0" # s "bd" # gain "1 0.5 1.5 0.8"
+
+d1 $ n "0*8" # s "hh" # pan "0 1"
+
+d1 $ n "0*8" # s "hh" # pan "0.3 0.8"
+
+d1 $ n "0*4" # s "jvbass" # coarse "0 8 16 24"
+
+d1 $ n "0*8" # s "jvbass" # crush "1 2 3 4 5 6 7 8"
+
+d1 $ n "0*5" # s "jvbass" # vowel "a e i o u"
+
+d1 $ n "0*8" # s "jvbass" # speed "1 1.1 1.2 1.3 1.4 1.5 1.6 1.7"
+
+d1 $ n "0*8" # s "jvbass" # up "1 5 9 12 -3 -5 -9 -12"
+
+d1 $ n "0" # s "rave" # begin "0.2" # end "0.35"
+
+d1 $ n "0 0 0 0" # s "hh" # nudge "0 0.15 0 0"
+
+d1 $ n "0 0" # s "rave" # cut "1"
+
+d1 $ n "0 0" # s "arpy" # cutoff "300" # resonance "0.4"
+
+d1 $ n "0" # s "arpy" # delay "0.7" # delaytime "0.1" # delayfeedback "0.8"
+
+d1 $ n "0" # s "arpy" # orbit "0" # room "1" # size "1"
+
+
+d1 $ n "0*16" # s "hh" # pan (sine1)
+
+d1 $ n "0*16" # s "hh" # pan (slow 4 $ sine1)
+
+d1 $ n "0*16" # s "hh" # pan (slow 4 $ scale 0.4 0.8 sine1)
+
+d1 $ n "0*2" # s "arpy" # cutoff (slow 4 $ scale 300 1500 sine1) # resonance (slow 4 $ scale 0.3 0.99 sine1)
+
+-------------------------------------
+
+d1 $ n (irand 20) # s "print"
+
+d1 $ n (irand 20) # s "print" # pan rand
+
+d1 $ n (run 10) # s "arpy"
+
+-------------------------------------
+draw $ "red yellow blue"
+
+draw $ superimpose (slow 2) $ "red yellow blue"
+
+d1 $ slow 1 $ sound "bd*8"
+
+draw $ superimpose (density 2) $ "red yellow blue"
+
+d1 $ density 1 $ sound "bd*8"
+
+-------------------------------------
+draw $ "red yellow blue orange"
+
+draw $ superimpose (rev) $ "red yellow blue orange"
+
+draw $ superimpose (palindrome) $ "red yellow blue orange"
+
+d1 $ sound "bd sn hh cp"
+
+d1 $ rev $ sound "bd sn hh cp"
+
+d1 $ palindrome $ sound "bd sn hh cp"
+
+-------------------------------------
+draw $ superimpose (brak) $ "red yellow blue orange"
+
+d1 $ brak $ sound "bd bd sn sn"
+-------------------------------------
+d1 $ degrade $ sound "bd*8"
+-------------------------------------
+draw $ superimpose (trunc 0.75) $ "red yellow blue orange"
+
+d1 $ trunc 0.75 $ sound "bd sn hh cp"
+-------------------------------------
+draw $ superimpose (zoom (0.25, 0.75)) $ "red yellow blue orange"
+
+d1 $ zoom (0.25, 0.75) $ sound "bd sn hh cp"
+-------------------------------------
+
+draw $ superimpose (every 2 (density 2)) $ "red yellow blue orange"
+
+d1 $ every 2 (density 2) $ sound "bd sn hh cp"
+
+d1 $ every 3 (# gain "2") $ every 2 (density 2) $ sound "bd sn hh cp"
+-------------------------------------
+
+draw $ superimpose (foldEvery [2, 3] (density 2)) $ "red yellow blue orange"
+
+draw $ superimpose (every 2 (density 2) . every 3 (density 2)) $ "red yellow blue orange"
+
+d1 $ foldEvery [2, 3] (density 2) $ sound "bd sn hh cp"
+-------------------------------------
+
+draw $ superimpose (sometimesBy 0.8 (density 2)) $ "red yellow blue orange"
+
+d1 $ sometimesBy 0.8 (density 2) $ sound "bd sn hh cp"
+
+-- almostAlways (0.9), often (0.75), sometimes (0.5), rarely (0.25), almostNever (0.1)
+
+d1 $ sometimes (density 2) $ sound "bd sn hh cp"
+--------------------------------------
+draw $ superimpose (whenmod 4 2 (density 2)) $ "red yellow blue orange"
+
+d1 $ whenmod 4 2 (density 2) $ sound "bd sn hh cp"
+
+d1 $ whenmod 8 4 (# up "5") $ sound "arpy:0"
+
+---------------------------------------
+
+draw $ superimpose (within (0.25, 0.75) (density 2)) $ "red yellow blue orange"
+
+d1 $ within (0.25, 0.75) (density 2) $ sound "bd sn hh cp"
+
+d1 $ within (0.25, 0.75) (# up "5") $ sound "arpy:0*4"
+
+---------------------------------------
+draw $ superimpose (iter 4) $ "red yellow blue orange"
+
+d1 $ iter 4 $ sound "bd sn hh cp"
+
+draw $ superimpose (0.25 <~) $ "red yellow blue orange"
+
+draw $ superimpose (0.25 ~>) $ "red yellow blue orange"
+
+d1 $ (0.25 <~) $ sound "bd sn hh cp"
+
+d1 $ every 2 (0.75 <~) $ sound "bd sn hh cp"
+
+---------------------------------------
+
+cps (10/60)
+
+d1 $ every 2 (|+| end "0.5") $ sound "padlong:0" # end "0.1"
+
+d1 $ every 2 (|*| end "10") $ sound "padlong:0" # end "0.1"
+
+d1 $ every 2 (|-| end "0.05") $ sound "padlong:0" # end "0.1"
+
+---------------------------------------
+cps (60/60)
+
+d1 $ striate 4 $ sound "arpy"
+
+d1 $ striate 64 $ sound "arpy"
+
+d1 $ slow 8 $ striate 128 $ sound "bev"
+
+d1 $ striate' 32 (1/64) $ sound "bev"
+
+-- first arg is number of slices, 2nd is length of a slice in fraction of sample
+
+d1 $ striate' 8 (1/8) $ sound "arpy"
+
+---------------------------------------
+d1 $ gap 4 $ sound "arpy"
+
+d1 $ chop 32 $ sound "arpy"
+
+---------------------------------------
+d1 $ stut 4 0.5 0.5 $ sound "arpy"
+
+-- num echoes, gain loss for each echo, time between echo
+
+d1 $ stut' 2 (0.3) (# vowel "a e") $ sound "arpy"
+
+-- num overlays, cycle time delay, function
+
+---------------------------------------
+draw $ slowspread (density) [2, 4, 8] $ "red yellow blue orange"
+
+d1 $ slowspread (density) [2, 4, 8] $ sound "bd sn hh cp"
+
+d1 $ slowspread ($) [density 2, striate 64, (# up "12")] $ sound "arpy:0 arpy:1 arpy:2 arpy:3"
+
+---------------------------------------
+d1 $ jux (rev) $ sound "arpy:6 ~ arpy:3 arpy 1"
+
+d1 $ jux (rev . slow 2) $ sound "arpy:6 ~ arpy:3 arpy 1"
+
+d1 $ jux (iter 4) $ sound "arpy:6 ~ arpy:3 arpy 1"
+
+---------------------------------------
+d1 $ sound "bd*4"
+
+d2 $ sound "arpy:6 ~ arpy:3 arpy 1"
+
+---------------------------------------
+d1 $ cat [sound "bd*4", sound "arpy:6 ~ arpy:3 arpy 1"]
+---------------------------------------
+d1 $ slowcat [
+  sound "bd*4",
+  sound "arpy:6 ~ arpy:3 arpy 1"
+]
+---------------------------------------
+d1 $ randcat [
+  sound "bd*4",
+  sound "arpy:6 ~ arpy:3 arpy 1",
+  sound "hh*8",
+  sound "sn:1 ~ [~ sn:1] sn:1"
+]
+---------------------------------------
+d1 $ interlace (sound "bd*4") (sound "arpy:6 ~ arpy:3 arpy 1")
+---------------------------------------
+d1 $ append (sound "bd*4") (sound "arpy:6 ~ arpy:3 arpy 1")
+
+d1 $ append' (sound "bd*4") (sound "arpy:6 ~ arpy:3 arpy 1")
+---------------------------------------
+d1 $ slow 4 $ spin 4 $ sound "arpy:6 ~ arpy:3 arpy 1"
+---------------------------------------
+d1 $ superimpose (iter 4 . (# up "7")) $ sound "arpy:6 ~ arpy:3 arpy 1"
+---------------------------------------
+d1 $ wedge (1/2) (sound "bd*4") (sound "arpy:6 ~ arpy:3 arpy 1")
+---------------------------------------
+d1 $ weave 2 (shape $ sine1) [sound "bd [sn drum:2*2] bd*2 [sn drum:1]", sound "arpy*8 ~"]
+
+-- number of cycles, shaping function, array of patterns to weave together
+
+d1 $ weave' 3 (sound "bd [sn drum:2*2] bd*2 [sn drum:1]") [density 2, (# speed "0.5"), chop 16]
+
+-- number of cycles, pattern, array of functions to apply to pattern and weave together
+
+---------------------------------------
+
+d1 $ stack [
+  sound "bd*4",
+  sound "arpy:6 ~ arpy:3 arpy 1",
+  sound "hh*8"
+]
+
+---------------------------------------
+d1 $ sound "arpy:0*4" # up (choose [0, 1, 2, 3, 4, 5])
+
+d1 $ s "arpy*4" # n (choose [0, 3, 5, 7])
+---------------------------------------
+
+d1 $ n "c4 c5 ~ g5" # s "supergong"
+
+d1 $ n "c4 c5 ~ g5" # s "supermandolin"
+
+d1 $ n "c4 c5 ~ g5" # s "superpiano"
+
+let (voice, voice_p) = pF "voice" (Just 0.5)
+
+let (lfo, lfo_p) = pF "lfo" (Just 1)
+
+d1 $ n "c4 c5 ~ g5" # s "supersquare" # sustain "0.2" # voice "0.2" # lfo "6"
+
+---------------------------------------
+
+let (freq, freq_p) = pF "freq" (Just 440)
+
+d1 $ freq "200" # s "sf_sine" # sustain "2"
+
+---------------------------------------
+
+-- other fun things...
+
+d1 $ n "c4 d4 e4 f4" # s "sf_tri" # sustain "0.3"
+
+d1 $ n (fmap (+3) $ "c4 d4 e4 f4") # s "sf_tri" # sustain "0.3"
+
+d1 $ n (fmap (subtract 3) $ "c4 d4 e4 f4") # s "sf_tri" # sustain "0.3"
+
+d1 $ n (offadd (1/32) (7) $ "c4 d4 e4 f4") # s "sf_tri" # sustain "0.3"
+
+---------------------------------------
+
+d1 $ n "c4 d4 e4 f4" # s "sf_tri" # sustain "0.3"
+
+t1 anticipate $ sound "bd*4"
+
+t1 (anticipateIn 2) $ sound "bd*4"
+
+t1 clutch $ sound "bd*4"
+
+t1 (clutchIn 4) $ sound "bd*4"
+
+t1 (mortal 4 4) $ sound "bd*4"
+-- num cycles to play pattern, num cycles to degrade pattern
+
+t1 xfade $ sound "arpy:0 arpy1 arpy:2 arpy:3"
+
+t1 (xfadeIn 8) $ sound "arpy:0 arpy1 arpy:2 arpy:3"
+
+---------------------------------------
+
+hush
+
+draw $ ((flip darken) <$> (stack [
+  every 3 (slow 2) $ every 7 (density 5) $ "red red white white",
+  superimpose (iter 3 . slow 2) $ "orange white orange white",
+  every 3 (slow 2) $ every 7 (density 5) $ "red red white white"
+]) <*> (slow 20 saw1))
+
+draw $ superimpose (iter 8) $ every 2 (slow 3) $
+  every 3 (density 5) $ "[grey white black, lightgrey darkgrey]"
+
+draw $ every 2 (rev) $ "[grey orange black, lightgrey red]"
+
+draw $ slowcat ["grey orange black red", "white blue"]
+
+draw $ ((flip darken) <$> (superimpose (iter 8) $ every 4 (slow 3) $ every 3
+(density 5) $ "[grey white black, lightgrey darkgrey]") <*> (slow 4
+sine1))
+
+draw $ (flip darken <$> ("grey orange black red") <*> (slow 8 sine1))
+
+hush
