@@ -1,0 +1,633 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>JS Remote Conf - Make Some Noise With Tone.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/beige.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="footer">
+				<p><a href="http://www.fradkin.com">http://www.fradkin.com</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.twitter.com/sfradkin">@sfradkin</a></p>
+			</div>
+			<div class="slides">
+				<section>
+					<h1>Make Some Noise With Tone.js</h1>
+					<h3>Scott Fradkin<br/>
+					<small>Flexion, Inc</small></h3>
+					<h4><a href="http://www.fradkin.com">http://www.fradkin.com</a>
+						<br/>
+						<a href="https://www.twitter.com/sfradkin">@sfradkin</a>
+					</h4>
+				</section>
+				<section>
+					<p>Welcome!</p>
+					<p>My name is Scott</p>
+					<ul>
+						<li>Lead Developer at Flexion, Inc</li>
+						<li>Team Lead, Java and JavaScript</li>
+						<li>Teach kids programming</li>
+						<li>Music</li>
+					</ul>
+				</section>
+				<section>
+					<p>Let's talk about audio in the browser</p>
+					<h2>Web Audio API</h2>
+				</section>
+				<section>
+					<p>Web Audio is pretty cool...</p>
+					<ul>
+						<li class="fragment">Low level synthesis and audio control</li>
+						<li class="fragment">Sample manipulation</li>
+					</ul>
+				</section>
+				<section>
+					<p>But it has some downsides</p>
+					<ul>
+						<li class="fragment">It can be rather complex</li>
+						<li class="fragment">Everything is a Node, don't leak resources</li>
+						<li class="fragment">Turning on and off and oscillator is not straightforward</li>
+						<li class="fragment"><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API Reference</a></li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<p>A Simple Web Audio Example</p>
+						<p>Play a frequency on an oscillator</p>
+					</section>
+					<section>
+						<p>Create the AudioContext (simplified)</p>
+						<pre><code>
+window.AudioContext = window.AudioContext
+	|| window.webkitAudioContext;
+waContext = new AudioContext();
+						</code></pre>
+					</section>
+					<section>
+						<p>Create an OscillatorNode and set the frequency</p>
+						<pre><code>
+waOsc = waContext.createOscillator();
+waOsc.type = "sine";
+waOsc.frequency.value = 110;
+						</code></pre>
+					</section>
+					<section>
+						<p>Create a GainNode and connect the OscillatorNode</p>
+						<pre><code>
+waGain = waContext.createGain();
+waGain.gain.value = 0.5;
+
+waOsc.connect(waGain);
+						</code></pre>
+					</section>
+					<section>
+						<p>Connect the GainNode to the context output</p>
+						<pre><code>
+waGain.connect(waContext.destination);
+						</code></pre>
+					</section>
+					<section>
+						<p>Start the OscillatorNode</p>
+						<pre><code>
+waOsc.start();
+						</code></pre>
+					</section>
+					<section>
+						<p>To stop the audio, either stop the OscillatorNode or set the GainNode volume to 0</p>
+						<p>If the OscillatorNode is stopped, it cannot be restarted</p>
+						<pre><code>
+waOsc.stop();
+or
+waGain.gain.value = 0;
+						</code></pre>
+					</section>
+					<section>
+						<p>Phew!</p>
+					</section>
+					<section>
+						<p>This is what it sounds like</p>
+						<button onclick="waInit(); waCreate();">Init Web Audio</button> <button onclick="waStart()">Start Oscillator</button> <button onclick="waGainDown()">Stop Oscillator - Gain</button> <button onclick="waGainUp()">Start Oscillator - Gain</button> <button onclick="waStop()">Stop Oscillator</button> <button onclick="waCleanup()">Cleanup</button>
+					</section>
+				</section>
+				<section>
+					<p>Introducing Tone.js</p>
+					<ul>
+						<li class="fragment">Created by <a href="http://yotammann.info">Yotam Mann</a>
+							<ul>
+								<li>Creates interactive musical experiences</li>
+								<li>Adjunct professor for NYU’s ITP program</li>
+							</ul>
+						</li>
+						<li class="fragment">Sits on top of the Web Audio API</li>
+						<li class="fragment">Abstracts the api to make it easier for a developer to use</li>
+						<li class="fragment">Takes care of the low level stuff like oscillator maintenance</li>
+						<li class="fragment">Developer can concentrate on creating sounds</li>
+					</ul>
+				</section>
+				<section>
+					<p>Topics</p>
+					<ul>
+						<li class="fragment">AudioContext</li>
+						<li class="fragment">Oscillators and Basic Synths</li>
+						<li class="fragment">Time</li>
+						<li class="fragment">Signals</li>
+						<li class="fragment">FX</li>
+						<li class="fragment">Scheduling</li>
+					</ul>
+				</section>
+				<section>
+					<p>AudioContext</p>
+					<ul>
+						<li class="fragment">Always need a Context</li>
+						<li class="fragment">Complex to initialize for every browser</li>
+						<li class="fragment">Just include the Tone.js file to initialize</li>
+						<li class="fragment">Tone.context</li>
+						<li class="fragment">Will rarely directly interact with the Context</li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<p>Oscillators</p>
+						<ul>
+							<li class="fragment">Oscillator is a Source</li>
+							<li class="fragment">Most basic is Tone.Oscillator</li>
+							<li class="fragment">Simple to use: Create, set frequency, connect to output, start()</li>
+						</ul>
+					</section>
+					<section>
+						<p>Oscillator Example</p>
+						<pre><code>
+var osc1;
+Tone.Transport.start();
+osc1 = new Tone.OmniOscillator('a3', 'sine');
+osc1.toMaster();
+osc1.start();
+osc1.stop();
+osc1.dispose();
+						</code></pre>
+					</section>
+					<section>
+						<p>A Tone.js Oscillator</p>
+						<button onclick="createOsc1()">Create</button> <button onclick="startOsc1()">start()</button> <button onclick="stopOsc1()">stop()</button> <button onclick="cleanupOsc1()">Clean up</button>
+					</section>
+					<section>
+						<p>Much less code</p>
+						<p>Tone.js takes care of the hard stuff</p>
+						<p>Can start and stop oscillators without worrying</p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Envelopes</p>
+						<p style="padding-bottom: 0px; margin-bottom: 0px;"><img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/ADSR_parameter.svg" style="width: 450px; height: auto; margin-bottom: 0px;"/></p>
+						<p style="font-size: 30%; padding-top: 10px; margin-top: 0px;">Source: Wikipedia</p>
+						<p>Let's add a standard ADSR envelope</p>
+					</section>
+					<section>
+						<p>We can modify the previous example slightly by adding a Tone.AmplitudeEnvelope
+							 and connecting it between the Oscillator and the output</p>
+						<pre><code>
+osc2 = new Tone.OmniOscillator('a3', 'sine');
+env2 = new Tone.AmplitudeEnvelope();
+
+osc2.connect(env2);
+env2.toMaster();
+						</code></pre>
+					</section>
+					<section>
+						<p>Envelope Example</p>
+						<button onclick="createNoStartOsc2()">Create</button> <button onclick="startOsc2()">start</button> <button onclick="cleanupOsc2()">Clean up</button>
+					</section>
+					<section>
+						<p>Nothing happened!</p>
+						<p>When using an envelope, we must trigger it</p>
+						<pre><code>
+// We need to use either the combination of
+envelope.triggerAttack();
+// and
+envelope.triggerRelease();
+// or use
+envelope.triggerAttackRelease(1);
+						</code></pre>
+					</section>
+					<section>
+						<p>Envelope Example 2nd Try</p>
+						<p><button onclick="createOsc2()">Create</button> <button onclick="triggerOsc2(document.getElementById('osc2Dur').value)">trigger</button> <button onclick="cleanupOsc2()">Clean up</button></p>
+						<p>Note length <input id="osc2Dur" type="text" name="osc2Dur"/> </p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Synths</p>
+						<ul>
+							<li class="fragment">Pre-built instruments that combine Oscillators, Envelopes, Filters</li>
+							<li class="fragment">Tone.Synth is the simplest</li>
+						</ul>
+					</section>
+					<section>
+						<p>Tone.Synth</p>
+						<p style="padding-bottom: 0px; margin-bottom: 0px;"><img src="https://docs.google.com/drawings/d/1-1_0YW2Z1J2EPI36P8fNCMcZG7N1w1GZluPs4og4evo/pub?w=1163&h=231" style="width: 450px; height: auto; margin-bottom: 0px;"/></p>
+						<p style="font-size: 30%; padding-top: 10px; margin-top: 0px;">Source: tonejs.github.io</p>
+					</section>
+					<section>
+						<p>Usage is very similar to Envelopes</p>
+						<pre><code>
+synth3 = new Tone.Synth({oscillator: { type: 'sine' } });
+
+synth3.toMaster();
+
+synth3.triggerAttackRelease('a3', '1');
+						</code></pre>
+					</section>
+					<section>
+						<p>Synth Example</p>
+						<p><button onclick="createSynth3()">Create</button> <button onclick="triggerSynth3(document.getElementById('synth3Note').value, document.getElementById('synth3Dur').value)">trigger</button> <button onclick="cleanupSynth3()">Clean up</button></p>
+						<p>Note <input id="synth3Note" type="text" name="synth3Note"/> Note length <input id="synth3Dur" type="text" name="synth3Dur"/> </p>
+					</section>
+					<section>
+						<p>Many other Synths available in Tone.js</p>
+						<ul>
+							<li>DuoSynth</li>
+							<li>NoiseSynth</li>
+							<li>PluckSynth</li>
+							<li>MetalSynth</li>
+							<li>FMSynth</li>
+							<li>and more</li>
+						</ul>
+						<p>Each is a self-contained instrument with easy to use controls</p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Time</p>
+						<p>Time is an important concept when working with audio</p>
+					</section>
+					<section>
+						<p>The envelope and synth examples required an amount of time</p>
+						<p>A number of seconds</p>
+						<p>However, time can be specified in a number of ways...</p>
+					</section>
+					<section>
+						<p>Note Length Notation</p>
+						<p>1n = whole note, 2n = half note, 4n, 8n</p>
+						<p>4t = quarter note triplet, 8t</p>
+						<p>1m = 1 measure, default is 4/4 time</p>
+						<p>Actual note lengths depend upon tempo and time signature</p>
+					</section>
+					<section>
+						<p>Transport Time Notation</p>
+						<p>Bars:Quarters:Sixteenths</p>
+						<p>2:2:9</p>
+					</section>
+					<section>
+						<p>Ticks</p>
+						<p>A tick is the smallest unit of time Tone.js uses</p>
+						<p>192 ticks per quarter note (PPQ) by default</p>
+						<p>10i, 200i</p>
+					</section>
+					<section>
+						<p>Frequency</p>
+						<p>5hz, 120hz</p>
+					</section>
+					<section>
+						<p>Seconds</p>
+						<p>2s, 1.2s</p>
+						<p>The 's' is optional</p>
+					</section>
+					<section>
+						<p>Use whichever time notation you feel comfortable with</p>
+						<p>Seconds or note length notation are probably the most popular</p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Signals</p>
+						<p>Many fields on Tone objects are not plain values</p>
+						<p>They are Signals</p>
+					</section>
+					<section>
+						<p>A Signal is an audio rate parameter that can be manipulated and scheduled</p>
+						<p class="fragment">The <b>frequency</b> of an Oscillator is an example</p>
+						<p class="fragment">Can be modified in real time</p>
+						<p class="fragment">Accessed using the <b>value</b> field of the Signal</p>
+						<pre class="fragment"><code>
+oscillator.frequency.value
+						</code></pre>
+					</section>
+					<section>
+						<p>Similar to Web Audio's AudioParams</p>
+						<p class="fragment">An AudioParam has functions such as:</p>
+						<ul class="fragment">
+							<li>setValueAtTime</li>
+							<li>linearRampToValueAtTime</li>
+							<li>setValueAtTime</li>
+						</ul>
+						<p class="fragment">Tone adds some extra functions:</p>
+						<ul class="fragment">
+							<li>rampTo</li>
+							<li>exponentialRampToValue</li>
+							<li>linearRampToValue</li>
+						</ul>
+					</section>
+					<section>
+						<p>These functions decide how to get from the current value to the new value by the time specified</p>
+					</section>
+					<section>
+						<p>Signals can modify Signals</p>
+						<ul>
+							<li>Add</li>
+							<li>Subtract</li>
+							<li>Multiply</li>
+						</ul>
+					</section>
+					<section>
+						<p>Other things that are Signals</p>
+						<ul>
+							<li class="fragment">Oscillator detune</li>
+							<li class="fragment">Envelope parameters</li>
+							<li class="fragment">Parameters on Components</li>
+						</ul>
+						<p class="fragment">All of these are dynamic and schedulable</p>
+					</section>
+					<section>
+						<p>Example: Change frequency</p>
+						<pre><code>
+osc4 = new Tone.OmniOscillator('a3', 'sine');
+osc4.toMaster();
+osc4.start();
+osc4.frequency.setValueAtTime('a4', '+1');
+						</code></pre>
+						<p><button onclick="createOsc4()">Create</button> <button onclick="changeFreqOsc4(document.getElementById('osc4Freq').value, document.getElementById('osc4Time').value)">Change Frequency</button> <button onclick="cleanupOsc4()">Clean up</button></p>
+						<p>Frequency <input id="osc4Freq" type="text" name="osc4Freq"/> Time <input id="osc4Time" type="text" name="osc4Time"/></p>
+					</section>
+					<section>
+						<p>Example: Change frequency - Exponential Ramp</p>
+						<pre><code>
+osc5 = new Tone.OmniOscillator('a3', 'sine');
+osc5.toMaster();
+osc5.start();
+osc5.frequency.exponentialRampToValue('a4', '1');
+						</code></pre>
+						<p><button onclick="createOsc5()">Create</button> <button onclick="changeFreqOsc5(document.getElementById('osc5Freq').value, document.getElementById('osc5Time').value)">Change Frequency</button> <button onclick="cleanupOsc5()">Clean up</button></p>
+						<p>Frequency <input id="osc5Freq" type="text" name="osc5Freq"/> Time <input id="osc5Time" type="text" name="osc5Time"/></p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Components</p>
+						<p class="fragment">Pre-built audio widgets</p>
+						<p class="fragment">LFO, Compressor, Limiter, CrossFader</p>
+						<p class="fragment">From previous example we can see how an LFO can be created</p>
+					</section>
+					<section>
+						<p>Components are chainable</p>
+						<p class="fragment">Connect inputs and outputs as needed</p>
+						<p class="fragment">Most parameters are Signals</p>
+					</section>
+					<section>
+						<p>Example: LFO</p>
+						<pre><code>
+osc6 = new Tone.OmniOscillator('a3', 'sine');
+osc6.toMaster();
+
+lfo6 = new Tone.LFO('1hz', Tone.Frequency('a3').toFrequency(),
+			   Tone.Frequency('a4').toFrequency());
+
+lfo6.connect(osc6.frequency);
+
+osc6.start();
+lfo6.start();
+
+lfo6.frequency.setValueAtTime('2hz', '+0.5');
+						</code></pre>
+						<p><button onclick="createOsc6()">Create</button> <button onclick="changeLfo6Freq(document.getElementById('lfo6Freq').value)">Change LFO Frequency</button> <button onclick="cleanupOsc6()">Clean up</button></p>
+						<p>LFO Frequency <input id="lfo6Freq" type="text" name="lfo6Freq"/></p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>FX</p>
+						<p class="fragment">Many pre-built FX</p>
+						<p class="fragment">Work just like Components</p>
+						<p class="fragment">Modify the incoming audio signal</p>
+					</section>
+					<section>
+						<p>Delay, Reverb, Bitcrush, Distortion</p>
+					</section>
+					<section>
+						<p>Example: Bitcrush</p>
+						<pre><code>
+synth7 = new Tone.Synth({oscillator: { type: 'sine' } });
+
+crush7 = new Tone.BitCrusher(4);
+crush7.toMaster();
+
+synth7.connect(crush7);
+synth7.triggerAttackRelease('a3', '2n');
+						</code></pre>
+						<p><button onclick="createSynth7()">Create</button> <button onclick="triggerSynth7(document.getElementById('synth7Bits').value, document.getElementById('synth7Note').value, document.getElementById('synth7Dur').value)">crush the synth</button> <button onlick="cleanupSynth7()">Clean up</button></p>
+						<p>Bits <input id="synth7Bits" type="text" name="synth7Bits"/> <p>Note <input id="synth7Note" type="text" name="synth7Note"/> Note length <input id="synth7Dur" type="text" name="synth7Dur"/></p>
+					</section>
+					<section>
+						<p>Example: Tremolo</p>
+						<pre><code>
+synth8 = new Tone.Synth({oscillator: { type: 'sine' } });
+
+tremolo8 = new Tone.Tremolo(5, 1);
+tremolo8.toMaster();
+tremolo8.start();
+
+synth8.connect(tremolo8);
+synth8.triggerAttackRelease('a3', '2');
+						</code></pre>
+						<p><button onclick="createSynth8()">Create</button> <button onclick="triggerSynth8(document.getElementById('trem8Freq').value, document.getElementById('synth8Note').value, document.getElementById('synth8Dur').value)">tremolo the synth</button> <button onlick="cleanupSynth8()">Clean up</button></p>
+						<p>Tremolo Freq <input id="trem8Freq" type="text" name="trem8Freq"/> <p>Note <input id="synth8Note" type="text" name="synth8Note"/> Note length <input id="synth8Dur" type="text" name="synth8Dur"/></p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Scheduling</p>
+						<p>When to play audio</p>
+					</section>
+					<section>
+						<p>Tone.Transport</p>
+						<ul>
+							<li class="fragment">Maintains time independent of Web Audio</li>
+							<li class="fragment">Uses an internal Clock which uses WebWorkers behind the scenes</li>
+							<li class="fragment">Controls tempo</li>
+							<li class="fragment">Functions allow scheduling of audio events</li>
+							<li class="fragment">schedule()</li>
+							<li class="fragment">scheduleRepeat()</li>
+							<li class="fragment">Requires a callback function which takes a time</li>
+						</ul>
+					</section>
+					<section>
+						<p>Example: Schedule Repeat</p>
+						<pre><code>
+synthRepeat = new Tone.Synth({oscillator: { type: 'sine' } });
+synthRepeat.toMaster();
+
+id = Tone.Transport.scheduleRepeat(function(time) {
+	synthRepeat.triggerAttackRelease('a3', '4n', time);
+}, '1');
+
+Tone.Transport.clear(id);
+						</code></pre>
+						<p><button onclick="createRepeat()">Create</button> <button onclick="cleanupRepeat()">Clean up</button></p>
+					</section>
+					<section>
+						<p>Other ways to schedule audio</p>
+						<ul>
+							<li class="fragment">Pattern (Loop)</li>
+							<li class="fragment">Part (Event)</li>
+							<li class="fragment">Sequence (Part)</li>
+						</ul>
+					</section>
+					<section>
+						<p>Pattern</p>
+						<pre><code>
+synthPat = new Tone.Synth({oscillator: { type: 'sine' } });
+synthPat.toMaster();
+
+thePattern = new Tone.Pattern(function(time, note) {
+	synthPat.triggerAttackRelease(note, '8n', time);
+}, ['c3', 'e3', 'g3', 'c4'], 'up');
+
+thePattern.start();
+thePattern.pattern = 'down;
+						</code></pre>
+						<p><button onclick="createPattern()">Create</button> <button onclick="changePattern(document.getElementById('patternType').value)">change pattern</button> <button onclick="cleanupPattern()">Clean up</button></p>
+						<p>Pattern Type <select id="patternType">
+							<option value="up">up</option>
+							<option value="down">down</option>
+							<option value="upDown">upDown</option>
+							<option value="downUp">downUp</option>
+							<option value="random">random</option>
+						</select></p>
+					</section>
+					<section>
+						<p>Part</p>
+						<pre><code>
+synthPart = new Tone.Synth({oscillator: { type: 'sine'} });
+synthPart.toMaster();
+
+thePart = new Tone.Part(function (time, event) {
+	synthPart.triggerAttackRelease(event.note, event.dur, time);
+}, [{'note' : 'c3', 'dur' : '0.2', 'time' : '0'},
+		{'note' : 'e3', 'dur' : '0.5', 'time' : '1'},
+		{'note' : 'f#3', 'dur' : '0.8', 'time' : '2'}]);
+
+thePart.loopStart = 0;
+thePart.loopEnd = 3;
+thePart.loop = true;
+
+thePart.start();
+						</code></pre>
+						<p><button onclick="createPart()">Create</button> <button onclick="cleanupPart()">Clean up</button></p>
+					</section>
+					<section>
+						<p>Sequence</p>
+						<pre><code>
+synthSeq = new Tone.Synth({oscillator: { type: 'sine'} });
+synthSeq.toMaster();
+
+theSequence = new Tone.Sequence(function (time, event) {
+ synthSeq.triggerAttackRelease(event.note, event.dur, time);
+}, [
+ [{'note' : 'c3', 'dur' : '0.1'}, {'note' : 'e3', 'dur' : '0.1'}, {'note' : 'f#3', 'dur' : '0.1'],
+ {'note' : 'c4', 'dur' : '0.3'}, {'note' : 'd4', 'dur' : '0.3'}, {'note' : 'e4', 'dur' : '0.3'}
+]);
+
+theSequence.loopStart = 0;
+theSequence.loopEnd = 3;
+theSequence.loop = true;
+
+theSequence.start();
+						</code></pre>
+						<p><button onclick="createSequence()">Create</button> <button onclick="cleanupSequence()">Clean up</button></p>
+					</section>
+				</section>
+				<section>
+					<section>
+						<p>Summary</p>
+						<p>We took a brief look at</p>
+						<ul>
+							<li class="fragment">AudioContext</li>
+							<li class="fragment">Basic Synths</li>
+							<li class="fragment">Time</li>
+							<li class="fragment">Signals</li>
+							<li class="fragment">FX</li>
+							<li class="fragment">Scheduling</li>
+						</ul>
+					</section>
+					<section>
+						<p>A lot in the API</p>
+						<p class="fragment">Robust</p>
+						<p class="fragment">Avoids using pitfalls such as using <b>getAnimationFrame()</b></p>
+						<p class="fragment">Will use AudioWorkers when available</p>
+						<p class="fragment">Everything has a <b>dispose()</b> for cleanup</p>
+						<p class="fragment">Lots more in the API</p>
+					</section>
+					<section>
+						<p>Lots of online <a href="https://tonejs.github.io/">examples</a></p>
+						<p>I'm working on <a href="http://fradkin.com/snapmusic-0.3/tone-snap.html">Snap Music</a></p>
+					</section>
+					<section>
+						<p>Thanks!</p>
+						<ul>
+							<li><a href="https://github.com/sfradkin/presentations/tree/master/jsremoteconf">This presentation</a></li>
+							<li><a href="http://fradkin.com">My website</a></li>
+							<li><a href="https://github.com/sfradkin">My Github</a></li>
+							<li><a href="https://soundcloud.com/17point2m">My SoundCloud</a></li>
+							<li><a href="https://github.com/Tonejs/Tone.js">Tone.js Github</a></li>
+							<li><a href="https://tonejs.github.io/">Tone.js Website</a></li>
+							<li><a href="https://groups.google.com/forum/#!forum/tonejs/topics">Tone.js Google Group</a></li>
+							<li><a href="https://webaudio.github.io/web-audio-api/">Web Audio API</a></li>
+							<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio at Mozilla</a></li>
+						</ul>
+					</section>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js' }
+				]
+			});
+		</script>
+		<script src="js/Tone.min.js"></script>
+		<script src="js/webaudio.js"></script>
+		<script src="js/tone-examples.js"></script>
+
+	</body>
+</html>
